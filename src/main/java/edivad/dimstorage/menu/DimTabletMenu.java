@@ -1,6 +1,6 @@
 package edivad.dimstorage.menu;
 
-import edivad.dimstorage.api.Frequency;
+import edivad.dimstorage.items.components.DimStorageComponents;
 import edivad.dimstorage.manager.DimStorageManager;
 import edivad.dimstorage.setup.Registration;
 import edivad.dimstorage.storage.DimChestStorage;
@@ -18,10 +18,10 @@ public class DimTabletMenu extends DimStorageMenu {
     super(Registration.DIMTABLET_MENU.get(), windowId);
 
     var item = inventory.player.getItemInHand(InteractionHand.MAIN_HAND);
-    var frequency = new Frequency(item.getOrCreateTag().getCompound("frequency"));
+    var frequency = item.get(DimStorageComponents.FREQUENCY_TABLET).frequency();
 
     this.chestInv = (DimChestStorage) DimStorageManager.instance(level)
-        .getStorage(frequency, "item");
+        .getStorage(level.registryAccess(), frequency, "item");
     this.chestInv.openInventory();
 
     this.addOwnSlots();

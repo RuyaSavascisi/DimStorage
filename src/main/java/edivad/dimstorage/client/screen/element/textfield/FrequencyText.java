@@ -12,6 +12,6 @@ public class FrequencyText extends EditBox {
     setMaxLength(3);
     setVisible(true);
     setFocused(false);
-    setValue(String.valueOf(frequency.getChannel()));
+    setValue(String.valueOf(frequency.channel()));
   }
 }

@@ -2,40 +2,35 @@ package edivad.dimstorage.network.to_client;
 
 import edivad.dimstorage.DimStorage;
 import edivad.dimstorage.blockentities.BlockEntityDimTank;
-import edivad.edivadlib.network.EdivadLibPacket;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record SyncLiquidTank(BlockPos pos, FluidStack fluidStack) implements EdivadLibPacket {
+public record SyncLiquidTank(BlockPos pos, FluidStack fluidStack) implements CustomPacketPayload {
 
-  public static final ResourceLocation ID = DimStorage.rl("sync_liquid_tank");
+  public static final Type<SyncLiquidTank> TYPE =
+      new Type<>(DimStorage.rl("sync_liquid_tank"));
 
-  public static SyncLiquidTank read(FriendlyByteBuf buf) {
-    return new SyncLiquidTank(buf.readBlockPos(), buf.readFluidStack());
-  }
-
-  @Override
-  public void write(FriendlyByteBuf buf) {
-    buf.writeBlockPos(pos);
-    buf.writeFluidStack(fluidStack);
-  }
+  public static final StreamCodec<RegistryFriendlyByteBuf, SyncLiquidTank> STREAM_CODEC =
+      StreamCodec.composite(
+          BlockPos.STREAM_CODEC, SyncLiquidTank::pos,
+          FluidStack.OPTIONAL_STREAM_CODEC, SyncLiquidTank::fluidStack,
+          SyncLiquidTank::new);
 
   @Override
-  public ResourceLocation id() {
-    return ID;
+  public Type<? extends CustomPacketPayload> type() {
+    return TYPE;
   }
 
-  @Override
-  public void handle(PlayPayloadContext ctx) {
-    ctx.level().ifPresent(level -> {
-      if (level.isLoaded(pos)) {
-        if (level.getBlockEntity(pos) instanceof BlockEntityDimTank tank) {
-          tank.liquidState.sync(fluidStack);
-        }
+  public static void handle(SyncLiquidTank message, IPayloadContext ctx) {
+    var level = ctx.player().level();
+    if (level.isLoaded(message.pos)) {
+      if (level.getBlockEntity(message.pos) instanceof BlockEntityDimTank tank) {
+        tank.liquidState.sync(message.fluidStack);
       }
-    });
+    }
   }
 }

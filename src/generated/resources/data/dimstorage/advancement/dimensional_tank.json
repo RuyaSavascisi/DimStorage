@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "dimstorage:dimensional_tank"
-            ]
+            "items": "dimstorage:dimensional_tank"
           }
         ]
       },
@@ -19,7 +17,8 @@
       "translate": "advancements.dimstorage.dimensional_tablet.desc"
     },
     "icon": {
-      "item": "dimstorage:dimensional_tank"
+      "count": 1,
+      "id": "dimstorage:dimensional_tank"
     },
     "title": {
       "translate": "advancements.dimstorage.dimensional_tablet"

@@ -4,7 +4,6 @@ import org.jetbrains.annotations.Nullable;
 import edivad.dimstorage.api.Frequency;
 import edivad.dimstorage.manager.DimStorageManager;
 import edivad.dimstorage.menu.DimTankMenu;
-import edivad.dimstorage.network.PacketHandler;
 import edivad.dimstorage.network.TankState;
 import edivad.dimstorage.network.to_client.SyncLiquidTank;
 import edivad.dimstorage.setup.Registration;
@@ -12,6 +11,7 @@ import edivad.dimstorage.storage.DimTankStorage;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
@@ -20,7 +20,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -31,6 +31,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class BlockEntityDimTank extends BlockEntityFrequencyOwner {
 
@@ -39,31 +40,31 @@ public class BlockEntityDimTank extends BlockEntityFrequencyOwner {
 
   public BlockEntityDimTank(BlockPos pos, BlockState state) {
     super(Registration.DIMTANK_TILE.get(), pos, state);
-    liquidState = new DimTankState(getFrequency());
+    this.liquidState = new DimTankState(getFrequency());
   }
 
   @Override
   public void onServerTick(Level level, BlockPos pos, BlockState state) {
-    if (autoEject) {
+    if (this.autoEject) {
       ejectLiquid();
     }
-    liquidState.update(level);
+    this.liquidState.update(level);
   }
 
   @Override
   public void onClientTick(Level level, BlockPos pos, BlockState state) {
-    liquidState.update(level);
+    this.liquidState.update(level);
   }
 
   private void ejectLiquid() {
     for (var side : Direction.values()) {
-      var pos = worldPosition.relative(side);
-      if (checkSameFrequency(level.getBlockEntity(pos))) {
+      var pos = this.worldPosition.relative(side);
+      if (checkSameFrequency(this.level.getBlockEntity(pos))) {
         continue;
       }
 
       var fluidHandler =
-          level.getCapability(Capabilities.FluidHandler.BLOCK, pos, side.getOpposite());
+          this.level.getCapability(Capabilities.FluidHandler.BLOCK, pos, side.getOpposite());
       if (fluidHandler != null) {
         var liquid = getStorage().drain(100, IFluidHandler.FluidAction.SIMULATE);
         if (liquid.getAmount() > 0) {
@@ -86,15 +87,15 @@ public class BlockEntityDimTank extends BlockEntityFrequencyOwner {
   @Override
   public void setFrequency(Frequency frequency) {
     super.setFrequency(frequency);
-    if (!level.isClientSide) {
-      liquidState.setFrequency(frequency);
+    if (!this.level.isClientSide) {
+      this.liquidState.setFrequency(frequency);
     }
   }
 
   @Override
   public DimTankStorage getStorage() {
-    return (DimTankStorage) DimStorageManager.instance(level)
-        .getStorage(getFrequency(), "fluid");
+    return (DimTankStorage) DimStorageManager.instance(this.level)
+        .getStorage(this.level.registryAccess(), this.getFrequency(), "fluid");
   }
 
   public int getComparatorInput() {
@@ -103,44 +104,44 @@ public class BlockEntityDimTank extends BlockEntityFrequencyOwner {
   }
 
   public void swapAutoEject() {
-    autoEject = !autoEject;
+    this.autoEject = !this.autoEject;
     this.setChanged();
   }
 
   @Override
-  protected void saveAdditional(CompoundTag tag) {
-    super.saveAdditional(tag);
-    tag.putBoolean("autoEject", autoEject);
+  protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+    super.saveAdditional(tag, registries);
+    tag.putBoolean("autoEject", this.autoEject);
   }
 
   @Override
-  public void load(CompoundTag tag) {
-    super.load(tag);
-    liquidState.setFrequency(getFrequency());
-    autoEject = tag.getBoolean("autoEject");
+  protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+    super.loadAdditional(tag, registries);
+    this.liquidState.setFrequency(getFrequency());
+    this.autoEject = tag.getBoolean("autoEject");
   }
 
   @Override
-  public InteractionResult use(ServerPlayer player, Level level, BlockPos pos,
+  public ItemInteractionResult useItemOn(ServerPlayer player, Level level, BlockPos pos,
       InteractionHand hand) {
     if (!canAccess(player)) {
       player.displayClientMessage(Component.literal("Access Denied!")
           .withStyle(ChatFormatting.RED), false);
-      return super.use(player, level, pos, hand);
+      return super.useItemOn(player, level, pos, hand);
     }
 
     boolean result = FluidUtil.interactWithFluidHandler(player, hand, getStorage());
     if (!result) {
-      return super.use(player, level, pos, hand);
+      return super.useItemOn(player, level, pos, hand);
     }
 
     level.playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
-    return InteractionResult.SUCCESS;
+    return ItemInteractionResult.SUCCESS;
   }
 
   @Nullable
   public IFluidHandler getFluidHandler(Direction direction) {
-    return locked ? null : this.getStorage();
+    return this.locked ? null : this.getStorage();
   }
 
   //Synchronizing on block update
@@ -148,32 +149,34 @@ public class BlockEntityDimTank extends BlockEntityFrequencyOwner {
   public final ClientboundBlockEntityDataPacket getUpdatePacket() {
     CompoundTag root = new CompoundTag();
     root.put("frequency", getFrequency().serializeNBT());
-    root.putBoolean("locked", locked);
-    root.putBoolean("autoEject", autoEject);
+    root.putBoolean("locked", this.locked);
+    root.putBoolean("autoEject", this.autoEject);
     return ClientboundBlockEntityDataPacket.create(this);
   }
 
   @Override
-  public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+  public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt,
+      HolderLookup.Provider provider) {
+    super.onDataPacket(net, pkt, provider);
     CompoundTag tag = pkt.getTag();
-    setFrequency(new Frequency(tag.getCompound("frequency")));
-    locked = tag.getBoolean("locked");
-    autoEject = tag.getBoolean("autoEject");
+    this.setFrequency(Frequency.deserializeNBT(tag.getCompound("frequency")));
+    this.locked = tag.getBoolean("locked");
+    this.autoEject = tag.getBoolean("autoEject");
   }
 
   //Synchronizing on chunk load
   @Override
-  public CompoundTag getUpdateTag() {
-    CompoundTag tag = super.getUpdateTag();
-    tag.putBoolean("autoEject", autoEject);
+  public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+    CompoundTag tag = super.getUpdateTag(registries);
+    tag.putBoolean("autoEject", this.autoEject);
     return tag;
   }
 
   @Override
-  public void handleUpdateTag(CompoundTag tag) {
-    setFrequency(new Frequency(tag.getCompound("frequency")));
-    locked = tag.getBoolean("locked");
-    autoEject = tag.getBoolean("autoEject");
+  public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider) {
+    this.setFrequency(Frequency.deserializeNBT(tag.getCompound("frequency")));
+    this.locked = tag.getBoolean("locked");
+    this.autoEject = tag.getBoolean("autoEject");
   }
 
   @Override
@@ -189,7 +192,7 @@ public class BlockEntityDimTank extends BlockEntityFrequencyOwner {
 
     @Override
     public void sendSyncPacket() {
-      PacketHandler.sendToAll(new SyncLiquidTank(getBlockPos(), serverLiquid));
+      PacketDistributor.sendToAllPlayers(new SyncLiquidTank(getBlockPos(), this.serverLiquid));
     }
 
     @Override

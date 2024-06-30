@@ -13,8 +13,12 @@ import edivad.dimstorage.datagen.DimStorageLootTableProvider;
 import edivad.dimstorage.datagen.Lang;
 import edivad.dimstorage.datagen.Recipes;
 import edivad.dimstorage.datagen.TagsProvider;
+import edivad.dimstorage.items.components.DimStorageComponents;
 import edivad.dimstorage.manager.DimStorageManager;
-import edivad.dimstorage.network.PacketHandler;
+import edivad.dimstorage.network.to_client.OpenChest;
+import edivad.dimstorage.network.to_client.SyncLiquidTank;
+import edivad.dimstorage.network.to_server.UpdateDimChest;
+import edivad.dimstorage.network.to_server.UpdateDimTank;
 import edivad.dimstorage.plugin.DimChestPlugin;
 import edivad.dimstorage.plugin.DimTankPlugin;
 import edivad.dimstorage.setup.ClientSetup;
@@ -25,8 +29,8 @@ import edivad.dimstorage.tools.DimCommands;
 import edivad.edivadlib.setup.UpdateChecker;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.InterModComms;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
@@ -38,6 +42,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 
 @Mod(DimStorage.ID)
 public class DimStorage {
@@ -47,17 +52,19 @@ public class DimStorage {
 
   public static final Logger LOGGER = LogUtils.getLogger();
 
-  public DimStorage(IEventBus modEventBus, Dist dist) {
+  public DimStorage(ModContainer modContainer, Dist dist) {
 
+    var modEventBus = modContainer.getEventBus();
     Registration.init(modEventBus);
     modEventBus.addListener(this::handleCommonSetup);
     modEventBus.addListener(this::handleClientSetup);
     modEventBus.addListener(this::handleRegisterMenuScreens);
     modEventBus.addListener(this::handleGatherData);
     modEventBus.addListener(this::registerCapabilities);
-    var packetHandler = new PacketHandler(modEventBus);
+    modEventBus.addListener(this::registerPayloads);
     DimStorageCreativeModeTabs.register(modEventBus);
-    Config.init();
+    DimStorageComponents.register(modEventBus);
+    Config.registerConfig(modContainer);
 
     if (dist.isClient()) {
       ClientSetup.init(modEventBus);
@@ -94,8 +101,8 @@ public class DimStorage {
     var lookupProvider = event.getLookupProvider();
     var fileHelper = event.getExistingFileHelper();
 
-    generator.addProvider(event.includeServer(), new Recipes(packOutput));
-    generator.addProvider(event.includeServer(), new DimStorageLootTableProvider(packOutput));
+    generator.addProvider(event.includeServer(), new Recipes(packOutput, lookupProvider));
+    generator.addProvider(event.includeServer(), new DimStorageLootTableProvider(packOutput, lookupProvider));
     generator.addProvider(event.includeServer(),
         new TagsProvider(packOutput, lookupProvider, fileHelper));
     generator.addProvider(event.includeServer(),
@@ -118,7 +125,16 @@ public class DimStorage {
         BlockEntityDimTank::getFluidHandler);
   }
 
+  private void registerPayloads(RegisterPayloadHandlersEvent event) {
+    var registrar = event.registrar(ID).versioned("1");
+    registrar.playToClient(SyncLiquidTank.TYPE, SyncLiquidTank.STREAM_CODEC, SyncLiquidTank::handle);
+    registrar.playToClient(OpenChest.TYPE, OpenChest.STREAM_CODEC, OpenChest::handle);
+
+    registrar.playToServer(UpdateDimChest.TYPE, UpdateDimChest.STREAM_CODEC, UpdateDimChest::handle);
+    registrar.playToServer(UpdateDimTank.TYPE, UpdateDimTank.STREAM_CODEC, UpdateDimTank::handle);
+  }
+
   public static ResourceLocation rl(String path) {
-    return new ResourceLocation(ID, path);
+    return ResourceLocation.fromNamespaceAndPath(ID, path);
   }
 }

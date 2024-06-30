@@ -59,65 +59,65 @@ public class DimTankRenderer implements BlockEntityRenderer<BlockEntityDimTank> 
       final int light = 15728880;
 
       // Top
-      renderer.vertex(matrix4f, TANK_THICKNESS + offset, scale + TANK_THICKNESS,
-          TANK_THICKNESS + offset).color(r, g, b, a).uv(u1, v1).uv2(light).endVertex();
-      renderer.vertex(matrix4f, TANK_THICKNESS + offset, scale + TANK_THICKNESS,
-          margin - TANK_THICKNESS).color(r, g, b, a).uv(u1, v2).uv2(light).endVertex();
-      renderer.vertex(matrix4f, margin - TANK_THICKNESS, scale + TANK_THICKNESS,
-          margin - TANK_THICKNESS).color(r, g, b, a).uv(u2, v2).uv2(light).endVertex();
-      renderer.vertex(matrix4f, margin - TANK_THICKNESS, scale + TANK_THICKNESS,
-          TANK_THICKNESS + offset).color(r, g, b, a).uv(u2, v1).uv2(light).endVertex();
+      renderer.addVertex(matrix4f, TANK_THICKNESS + offset, scale + TANK_THICKNESS,
+          TANK_THICKNESS + offset).setColor(r, g, b, a).setUv(u1, v1).setLight(light);
+      renderer.addVertex(matrix4f, TANK_THICKNESS + offset, scale + TANK_THICKNESS,
+          margin - TANK_THICKNESS).setColor(r, g, b, a).setUv(u1, v2).setLight(light);
+      renderer.addVertex(matrix4f, margin - TANK_THICKNESS, scale + TANK_THICKNESS,
+          margin - TANK_THICKNESS).setColor(r, g, b, a).setUv(u2, v2).setLight(light);
+      renderer.addVertex(matrix4f, margin - TANK_THICKNESS, scale + TANK_THICKNESS,
+          TANK_THICKNESS + offset).setColor(r, g, b, a).setUv(u2, v1).setLight(light);
 
       // Bottom
-      renderer.vertex(matrix4f, margin - TANK_THICKNESS, TANK_THICKNESS, TANK_THICKNESS + offset)
-          .color(r, g, b, a).uv(u2, v1).uv2(light).endVertex();
-      renderer.vertex(matrix4f, margin - TANK_THICKNESS, TANK_THICKNESS, margin - TANK_THICKNESS)
-          .color(r, g, b, a).uv(u2, v2).uv2(light).endVertex();
-      renderer.vertex(matrix4f, TANK_THICKNESS + offset, TANK_THICKNESS, margin - TANK_THICKNESS)
-          .color(r, g, b, a).uv(u1, v2).uv2(light).endVertex();
-      renderer.vertex(matrix4f, TANK_THICKNESS + offset, TANK_THICKNESS, TANK_THICKNESS + offset)
-          .color(r, g, b, a).uv(u1, v1).uv2(light).endVertex();
+      renderer.addVertex(matrix4f, margin - TANK_THICKNESS, TANK_THICKNESS, TANK_THICKNESS + offset)
+          .setColor(r, g, b, a).setUv(u2, v1).setLight(light);
+      renderer.addVertex(matrix4f, margin - TANK_THICKNESS, TANK_THICKNESS, margin - TANK_THICKNESS)
+          .setColor(r, g, b, a).setUv(u2, v2).setLight(light);
+      renderer.addVertex(matrix4f, TANK_THICKNESS + offset, TANK_THICKNESS, margin - TANK_THICKNESS)
+          .setColor(r, g, b, a).setUv(u1, v2).setLight(light);
+      renderer.addVertex(matrix4f, TANK_THICKNESS + offset, TANK_THICKNESS, TANK_THICKNESS + offset)
+          .setColor(r, g, b, a).setUv(u1, v1).setLight(light);
 
       // Sides
       //NORTH
-      renderer.vertex(matrix4f, TANK_THICKNESS + offset, scale + TANK_THICKNESS,
-          margin - TANK_THICKNESS).color(r, g, b, a).uv(u1, v1).uv2(light).endVertex();
-      renderer.vertex(matrix4f, TANK_THICKNESS + offset, TANK_THICKNESS, margin - TANK_THICKNESS)
-          .color(r, g, b, a).uv(u1, v2).uv2(light).endVertex();
-      renderer.vertex(matrix4f, margin - TANK_THICKNESS, TANK_THICKNESS, margin - TANK_THICKNESS)
-          .color(r, g, b, a).uv(u2, v2).uv2(light).endVertex();
-      renderer.vertex(matrix4f, margin - TANK_THICKNESS, scale + TANK_THICKNESS,
-          margin - TANK_THICKNESS).color(r, g, b, a).uv(u2, v1).uv2(light).endVertex();
+      renderer.addVertex(matrix4f, TANK_THICKNESS + offset, scale + TANK_THICKNESS,
+          margin - TANK_THICKNESS).setColor(r, g, b, a).setUv(u1, v1).setLight(light);
+      renderer.addVertex(matrix4f, TANK_THICKNESS + offset, TANK_THICKNESS, margin - TANK_THICKNESS)
+          .setColor(r, g, b, a).setUv(u1, v2).setLight(light);
+      renderer.addVertex(matrix4f, margin - TANK_THICKNESS, TANK_THICKNESS, margin - TANK_THICKNESS)
+          .setColor(r, g, b, a).setUv(u2, v2).setLight(light);
+      renderer.addVertex(matrix4f, margin - TANK_THICKNESS, scale + TANK_THICKNESS,
+          margin - TANK_THICKNESS).setColor(r, g, b, a).setUv(u2, v1).setLight(light);
 
       //SOUTH
-      renderer.vertex(matrix4f, margin - TANK_THICKNESS, scale + TANK_THICKNESS,
-          TANK_THICKNESS + offset).color(r, g, b, a).uv(u2, v1).uv2(light).endVertex();
-      renderer.vertex(matrix4f, margin - TANK_THICKNESS, TANK_THICKNESS, TANK_THICKNESS + offset)
-          .color(r, g, b, a).uv(u2, v2).uv2(light).endVertex();
-      renderer.vertex(matrix4f, TANK_THICKNESS + offset, TANK_THICKNESS, TANK_THICKNESS + offset)
-          .color(r, g, b, a).uv(u1, v2).uv2(light).endVertex();
-      renderer.vertex(matrix4f, TANK_THICKNESS + offset, scale + TANK_THICKNESS,
-          TANK_THICKNESS + offset).color(r, g, b, a).uv(u1, v1).uv2(light).endVertex();
+      renderer.addVertex(matrix4f, margin - TANK_THICKNESS, scale + TANK_THICKNESS,
+          TANK_THICKNESS + offset).setColor(r, g, b, a).setUv(u2, v1).setLight(light);
+      renderer.addVertex(matrix4f, margin - TANK_THICKNESS, TANK_THICKNESS, TANK_THICKNESS + offset)
+          .setColor(r, g, b, a).setUv(u2, v2).setLight(light);
+      renderer.addVertex(matrix4f, TANK_THICKNESS + offset, TANK_THICKNESS, TANK_THICKNESS + offset)
+          .setColor(r, g, b, a).setUv(u1, v2).setLight(light);
+      renderer.addVertex(matrix4f, TANK_THICKNESS + offset, scale + TANK_THICKNESS,
+          TANK_THICKNESS + offset).setColor(r, g, b, a).setUv(u1, v1).setLight(light);
 
       //WEAST
-      renderer.vertex(matrix4f, margin - TANK_THICKNESS, scale + TANK_THICKNESS,
-          margin - TANK_THICKNESS).color(r, g, b, a).uv(u2, v1).uv2(light).endVertex();
-      renderer.vertex(matrix4f, margin - TANK_THICKNESS, TANK_THICKNESS, margin - TANK_THICKNESS)
-          .color(r, g, b, a).uv(u2, v2).uv2(light).endVertex();
-      renderer.vertex(matrix4f, margin - TANK_THICKNESS, TANK_THICKNESS, TANK_THICKNESS + offset)
-          .color(r, g, b, a).uv(u1, v2).uv2(light).endVertex();
-      renderer.vertex(matrix4f, margin - TANK_THICKNESS, scale + TANK_THICKNESS,
-          TANK_THICKNESS + offset).color(r, g, b, a).uv(u1, v1).uv2(light).endVertex();
+      renderer.addVertex(matrix4f, margin - TANK_THICKNESS, scale + TANK_THICKNESS,
+          margin - TANK_THICKNESS).setColor(r, g, b, a).setUv(u2, v1).setLight(light);
+      renderer.addVertex(matrix4f, margin - TANK_THICKNESS, TANK_THICKNESS, margin - TANK_THICKNESS)
+          .setColor(r, g, b, a).setUv(u2, v2).setLight(light);
+      renderer.addVertex(matrix4f, margin - TANK_THICKNESS, TANK_THICKNESS, TANK_THICKNESS + offset)
+          .setColor(r, g, b, a).setUv(u1, v2).setLight(light);
+      renderer.addVertex(matrix4f, margin - TANK_THICKNESS, scale + TANK_THICKNESS,
+          TANK_THICKNESS + offset).setColor(r, g, b, a).setUv(u1, v1).setLight(light);
 
       //EAST
-      renderer.vertex(matrix4f, TANK_THICKNESS + offset, scale + TANK_THICKNESS,
-          TANK_THICKNESS + offset).color(r, g, b, a).uv(u1, v1).uv2(light).endVertex();
-      renderer.vertex(matrix4f, TANK_THICKNESS + offset, TANK_THICKNESS, TANK_THICKNESS + offset)
-          .color(r, g, b, a).uv(u1, v2).uv2(light).endVertex();
-      renderer.vertex(matrix4f, TANK_THICKNESS + offset, TANK_THICKNESS, margin - TANK_THICKNESS)
-          .color(r, g, b, a).uv(u2, v2).uv2(light).endVertex();
-      renderer.vertex(matrix4f, TANK_THICKNESS + offset, scale + TANK_THICKNESS,
-          margin - TANK_THICKNESS).color(r, g, b, a).uv(u2, v1).uv2(light).endVertex();
+      renderer.addVertex(matrix4f, TANK_THICKNESS + offset, scale + TANK_THICKNESS,
+          TANK_THICKNESS + offset).setColor(r, g, b, a).setUv(u1, v1).setLight(light);
+      renderer.addVertex(matrix4f, TANK_THICKNESS + offset, TANK_THICKNESS, TANK_THICKNESS + offset)
+          .setColor(r, g, b, a).setUv(u1, v2).setLight(light);
+      renderer.addVertex(matrix4f, TANK_THICKNESS + offset, TANK_THICKNESS, margin - TANK_THICKNESS)
+          .setColor(r, g, b, a).setUv(u2, v2).setLight(light);
+      renderer.addVertex(matrix4f, TANK_THICKNESS + offset, scale + TANK_THICKNESS,
+          margin - TANK_THICKNESS).setColor(r, g, b, a).setUv(u2, v1).setLight(light);
     }
   }
 }

@@ -7,7 +7,6 @@ import edivad.dimstorage.client.screen.element.button.ChangeButton;
 import edivad.dimstorage.client.screen.element.button.LockButton;
 import edivad.dimstorage.client.screen.element.button.OwnerButton;
 import edivad.dimstorage.client.screen.element.textfield.FrequencyText;
-import edivad.dimstorage.network.PacketHandler;
 import edivad.dimstorage.network.to_server.UpdateDimChest;
 import edivad.dimstorage.network.to_server.UpdateDimTank;
 import edivad.dimstorage.tools.Translations;
@@ -16,6 +15,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public abstract class FrequencyScreen<T extends AbstractContainerMenu> extends PanelScreen<T> {
 
@@ -48,16 +48,16 @@ public abstract class FrequencyScreen<T extends AbstractContainerMenu> extends P
   }
 
   private void changeFrequency() {
-    int prevChannel = blockEntityFrequencyOwner.getFrequency().getChannel();
+    int prevChannel = blockEntityFrequencyOwner.getFrequency().channel();
     try {
       int newFreq = Math.abs(Integer.parseInt(freqTextField.getValue()));
       blockEntityFrequencyOwner.setFrequency(
           blockEntityFrequencyOwner.getFrequency().setChannel(newFreq));
 
       if (blockEntityFrequencyOwner instanceof BlockEntityDimChest chest) {
-        PacketHandler.sendToServer(new UpdateDimChest(chest));
+        PacketDistributor.sendToServer(new UpdateDimChest(chest));
       } else if (blockEntityFrequencyOwner instanceof BlockEntityDimTank tank) {
-        PacketHandler.sendToServer(new UpdateDimTank(tank));
+        PacketDistributor.sendToServer(new UpdateDimTank(tank));
       }
     } catch (Exception e) {
       freqTextField.setValue(String.valueOf(prevChannel));
@@ -83,7 +83,7 @@ public abstract class FrequencyScreen<T extends AbstractContainerMenu> extends P
     if (drawSettings) {
       int posY = 45;
 
-      // owner
+      // gameProfile
       guiGraphics.drawString(this.font, OWNER, 185, posY, 4210752, false);
       posY += 9;
       guiGraphics.hLine(185, 185 + this.font.width(OWNER), posY, 0xFF333333);

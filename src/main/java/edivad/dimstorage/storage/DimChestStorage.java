@@ -4,13 +4,14 @@ import java.util.Arrays;
 import edivad.dimstorage.api.AbstractDimStorage;
 import edivad.dimstorage.api.Frequency;
 import edivad.dimstorage.manager.DimStorageManager;
-import edivad.dimstorage.network.PacketHandler;
 import edivad.dimstorage.network.to_client.OpenChest;
 import edivad.dimstorage.tools.InventoryUtils;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class DimChestStorage extends AbstractDimStorage implements Container {
 
@@ -30,9 +31,9 @@ public class DimChestStorage extends AbstractDimStorage implements Container {
     }
   }
 
-  public void loadFromTag(CompoundTag tag) {
+  public void loadFromTag(HolderLookup.Provider registries, CompoundTag tag) {
     empty();
-    InventoryUtils.readItemStacksFromTag(items, tag.getList("items", 10));
+    InventoryUtils.readItemStacksFromTag(registries, items, tag.getList("items", 10));
   }
 
   @Override
@@ -40,9 +41,9 @@ public class DimChestStorage extends AbstractDimStorage implements Container {
     return "item";
   }
 
-  public CompoundTag saveToTag() {
+  public CompoundTag saveToTag(HolderLookup.Provider registries) {
     CompoundTag compound = new CompoundTag();
-    compound.put("items", InventoryUtils.writeItemStacksToTag(this.items));
+    compound.put("items", InventoryUtils.writeItemStacksToTag(registries, this.items));
     return compound;
   }
 
@@ -70,7 +71,7 @@ public class DimChestStorage extends AbstractDimStorage implements Container {
       synchronized (this) {
         open++;
         if (open >= 1) {
-          PacketHandler.sendToAll(new OpenChest(freq, true));
+          PacketDistributor.sendToAllPlayers(new OpenChest(freq, true));
         }
       }
     }
@@ -81,7 +82,7 @@ public class DimChestStorage extends AbstractDimStorage implements Container {
       synchronized (this) {
         open--;
         if (open <= 0) {
-          PacketHandler.sendToAll(new OpenChest(freq, false));
+          PacketDistributor.sendToAllPlayers(new OpenChest(freq, false));
         }
       }
     }

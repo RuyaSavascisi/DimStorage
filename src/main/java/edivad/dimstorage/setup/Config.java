@@ -9,20 +9,20 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
-import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class Config {
 
-  public static void init() {
+  public static void registerConfig(ModContainer container) {
     var SERVER_BUILDER = new ModConfigSpec.Builder();
     SERVER_BUILDER.comment(DimStorage.MODNAME + "'s config");
 
     DimBlock.registerServerConfig(SERVER_BUILDER);
     DimTablet.registerServerConfig(SERVER_BUILDER);
 
-    ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SERVER_BUILDER.build());
+    container.registerConfig(ModConfig.Type.SERVER, SERVER_BUILDER.build());
   }
 
   public static class DimBlock {
@@ -57,7 +57,7 @@ public class Config {
               "A list of blocks that the DimTablet takes and transfers to the connected DimChest",
               "[/dimstorage add] adds the item you have in the main hand to this list")
           .defineList("allow_list", allowList(),
-              o -> ResourceLocation.isValidResourceLocation(o.toString()));
+              o -> ResourceLocation.tryParse(o.toString()) != null);
 
       SERVER_BUILDER.pop();
     }

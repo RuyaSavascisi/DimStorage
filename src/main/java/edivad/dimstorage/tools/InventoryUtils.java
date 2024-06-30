@@ -1,6 +1,7 @@
 package edivad.dimstorage.tools;
 
 import org.jetbrains.annotations.NotNull;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NumericTag;
@@ -13,34 +14,41 @@ public class InventoryUtils {
   /**
    * NBT item loading function with support for stack sizes > 32K
    */
-  public static void readItemStacksFromTag(ItemStack[] items, ListTag tagList) {
+  public static void readItemStacksFromTag(HolderLookup.Provider lookupProvider,
+      ItemStack[] items, ListTag tagList) {
     for (int i = 0; i < tagList.size(); i++) {
       var tag = tagList.getCompound(i);
-      int b = tag.getShort("Slot");
-      items[b] = ItemStack.of(tag);
-      var quant = tag.get("Quantity");
-      if (quant instanceof NumericTag numericTag) {
-        items[b].setCount(numericTag.getAsInt());
-      }
+      ItemStack.parse(lookupProvider, tag).ifPresent(itemStack -> {
+        int b = tag.getShort("Slot");
+        items[b] = itemStack;
+        var quant = tag.get("Quantity");
+        if (quant instanceof NumericTag numericTag) {
+          items[b].setCount(numericTag.getAsInt());
+        }
+      });
     }
   }
 
   /**
    * NBT item saving function
    */
-  public static ListTag writeItemStacksToTag(ItemStack[] items) {
-    return writeItemStacksToTag(items, 64);
+  public static ListTag writeItemStacksToTag(HolderLookup.Provider lookupProvider,
+      ItemStack[] items) {
+    return writeItemStacksToTag(lookupProvider, items, 64);
   }
 
   /**
    * NBT item saving function with support for stack sizes > 32K
    */
-  public static ListTag writeItemStacksToTag(ItemStack[] items, int maxQuantity) {
+  public static ListTag writeItemStacksToTag(HolderLookup.Provider lookupProvider,
+      ItemStack[] items, int maxQuantity) {
     ListTag tagList = new ListTag();
     for (int i = 0; i < items.length; i++) {
+      if (items[i].isEmpty()) {
+        continue;
+      }
       var tag = new CompoundTag();
       tag.putShort("Slot", (short) i);
-      items[i].save(tag);
 
       if (maxQuantity > Short.MAX_VALUE) {
         tag.putInt("Quantity", items[i].getCount());
@@ -48,7 +56,7 @@ public class InventoryUtils {
         tag.putShort("Quantity", (short) items[i].getCount());
       }
 
-      tagList.add(tag);
+      tagList.add(items[i].save(lookupProvider, tag));
     }
     return tagList;
   }

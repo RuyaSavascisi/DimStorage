@@ -7,14 +7,21 @@
     },
     "b": {
       "item": "dimstorage:solid_dim_core"
+    },
+    "c": {
+      "item": "minecraft:cauldron"
+    },
+    "d": {
+      "tag": "c:glass_blocks"
     }
   },
   "pattern": [
-    "aaa",
-    "aba",
-    "aaa"
+    "ada",
+    "dcd",
+    "aba"
   ],
   "result": {
-    "item": "dimstorage:dimensional_chest"
+    "count": 1,
+    "id": "dimstorage:dimensional_tank"
   }
 }

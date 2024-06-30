@@ -14,7 +14,7 @@ import mcjty.theoneprobe.api.IProbeInfoProvider;
 import mcjty.theoneprobe.api.ITheOneProbe;
 import mcjty.theoneprobe.api.ProbeMode;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -29,8 +29,8 @@ public class TOPProvider implements IProbeInfoProvider, Function<ITheOneProbe, V
     probe.registerElementFactory(new IElementFactory() {
 
       @Override
-      public IElement createElement(FriendlyByteBuf friendlyByteBuf) {
-        return new MyFluidElement(friendlyByteBuf);
+      public IElement createElement(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+        return new MyFluidElement(registryFriendlyByteBuf);
       }
 
       @Override
@@ -59,7 +59,7 @@ public class TOPProvider implements IProbeInfoProvider, Function<ITheOneProbe, V
         probeInfo.horizontal()
             .text(owner.append(" " + blockFrequency.getOwner()).withStyle(textColor));
       }
-      probeInfo.horizontal().text(frequency.append(" " + blockFrequency.getChannel()));
+      probeInfo.horizontal().text(frequency.append(" " + blockFrequency.channel()));
       if (frequencyOwner.locked) {
         probeInfo.horizontal().text(locked.append(" ").append(yes));
       }

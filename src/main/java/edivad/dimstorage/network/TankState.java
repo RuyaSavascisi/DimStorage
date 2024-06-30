@@ -34,7 +34,7 @@ public abstract class TankState {
       sendSyncPacket();
       clientLiquid = serverLiquid.copy();
     }
-    if ((prec.getAmount() == 0) != (succ.getAmount() == 0) || !prec.isFluidEqual(succ)) {
+    if ((prec.getAmount() == 0) != (succ.getAmount() == 0) || !FluidStack.isSameFluidSameComponents(prec, succ)) {
       onLiquidChanged();
     }
   }
@@ -50,6 +50,6 @@ public abstract class TankState {
 
   private FluidStack getFluidStorageServer(ServerLevel level) {
     return ((DimTankStorage) DimStorageManager.instance(level)
-        .getStorage(frequency, "fluid")).getFluidInTank(0);
+        .getStorage(level.registryAccess(), frequency, "fluid")).getFluidInTank(0);
   }
 }

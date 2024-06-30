@@ -33,7 +33,7 @@ public class DimStorageAdvancementProvider extends AdvancementProvider {
           .display(Registration.DIMCORE.get(),
               Translations.ADVANCEMENTS_ROOT.translateTitle(),
               Translations.ADVANCEMENTS_ROOT.translateDescription(),
-              new ResourceLocation("textures/gui/advancements/backgrounds/stone.png"),
+              ResourceLocation.withDefaultNamespace("textures/gui/advancements/backgrounds/stone.png"),
               AdvancementType.TASK,
               true,
               true,

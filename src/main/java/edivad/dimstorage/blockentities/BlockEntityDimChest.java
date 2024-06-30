@@ -9,6 +9,7 @@ import edivad.dimstorage.setup.Registration;
 import edivad.dimstorage.storage.DimChestStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -33,15 +34,15 @@ public class BlockEntityDimChest extends BlockEntityFrequencyOwner {
 
   public BlockEntityDimChest(BlockPos pos, BlockState state) {
     super(Registration.DIMCHEST_TILE.get(), pos, state);
-    movablePartState = MIN_MOVABLE_POSITION;
+    this.movablePartState = MIN_MOVABLE_POSITION;
   }
 
   @Override
   public void onServerTick(Level level, BlockPos pos, BlockState state) {
-    if (level.getGameTime() % 20 == 0 || openCount != getStorage().getNumOpen()) {
-      openCount = getStorage().getNumOpen();
-      level.blockEvent(pos, state.getBlock(), 1, openCount);
-      level.updateNeighborsAt(worldPosition, state.getBlock());
+    if (level.getGameTime() % 20 == 0 || this.openCount != this.getStorage().getNumOpen()) {
+      this.openCount = this.getStorage().getNumOpen();
+      level.blockEvent(pos, state.getBlock(), 1, this.openCount);
+      level.updateNeighborsAt(this.worldPosition, state.getBlock());
     }
 
     commonTick();
@@ -53,18 +54,18 @@ public class BlockEntityDimChest extends BlockEntityFrequencyOwner {
   }
 
   private void commonTick() {
-    if (openCount > 0) //Both server and client
+    if (this.openCount > 0) //Both server and client
     {
-      if (movablePartState < MAX_MOVABLE_POSITION) {
-        movablePartState += OPENING_SPEED;
+      if (this.movablePartState < MAX_MOVABLE_POSITION) {
+        this.movablePartState += OPENING_SPEED;
       } else {
-        movablePartState = MAX_MOVABLE_POSITION;
+        this.movablePartState = MAX_MOVABLE_POSITION;
       }
     } else {
-      if (movablePartState > MIN_MOVABLE_POSITION) {
-        movablePartState -= OPENING_SPEED;
+      if (this.movablePartState > MIN_MOVABLE_POSITION) {
+        this.movablePartState -= OPENING_SPEED;
       } else {
-        movablePartState = MIN_MOVABLE_POSITION;
+        this.movablePartState = MIN_MOVABLE_POSITION;
       }
     }
   }
@@ -77,13 +78,13 @@ public class BlockEntityDimChest extends BlockEntityFrequencyOwner {
 
   @Nullable
   public IItemHandler getItemHandler(Direction direction) {
-    return locked ? null : new InvWrapper(getStorage());
+    return this.locked ? null : new InvWrapper(getStorage());
   }
 
   @Override
   public boolean triggerEvent(int id, int type) {
     if (id == 1) {
-      openCount = type;
+      this.openCount = type;
       return true;
     }
     return false;
@@ -91,24 +92,24 @@ public class BlockEntityDimChest extends BlockEntityFrequencyOwner {
 
   @Override
   public DimChestStorage getStorage() {
-    return (DimChestStorage) DimStorageManager.instance(level)
-        .getStorage(getFrequency(), "item");
+    return (DimChestStorage) DimStorageManager.instance(this.level)
+        .getStorage(this.level.registryAccess(), getFrequency(), "item");
   }
 
   public void onPlaced(LivingEntity entity) {
-    rotation = (int) Math.floor(entity.getYRot() * 4 / 360 + 2.5D) & 3;
+    this.rotation = (int) Math.floor(entity.getYRot() * 4 / 360 + 2.5D) & 3;
   }
 
   @Override
-  protected void saveAdditional(CompoundTag tag) {
-    super.saveAdditional(tag);
-    tag.putByte("rot", (byte) rotation);
+  protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+    super.saveAdditional(tag, registries);
+    tag.putByte("rot", (byte) this.rotation);
   }
 
   @Override
-  public void load(CompoundTag tag) {
-    super.load(tag);
-    rotation = tag.getByte("rot") & 3;
+  protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+    super.loadAdditional(tag, registries);
+    this.rotation = tag.getByte("rot") & 3;
   }
 
   //Synchronizing on block update
@@ -116,31 +117,33 @@ public class BlockEntityDimChest extends BlockEntityFrequencyOwner {
   public final ClientboundBlockEntityDataPacket getUpdatePacket() {
     CompoundTag root = new CompoundTag();
     root.put("frequency", getFrequency().serializeNBT());
-    root.putBoolean("locked", locked);
-    root.putByte("rot", (byte) rotation);
+    root.putBoolean("locked", this.locked);
+    root.putByte("rot", (byte) this.rotation);
     return ClientboundBlockEntityDataPacket.create(this);
   }
 
   @Override
-  public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-    CompoundTag tag = pkt.getTag();
-    setFrequency(new Frequency(tag.getCompound("frequency")));
-    locked = tag.getBoolean("locked");
-    rotation = tag.getByte("rot") & 3;
+  public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt,
+      HolderLookup.Provider provider) {
+    super.onDataPacket(net, pkt, provider);
+    var tag = pkt.getTag();
+    this.setFrequency(Frequency.deserializeNBT(tag.getCompound("frequency")));
+    this.locked = tag.getBoolean("locked");
+    this.rotation = tag.getByte("rot") & 3;
   }
 
   //Synchronizing on chunk load
   @Override
-  public CompoundTag getUpdateTag() {
-    CompoundTag tag = super.getUpdateTag();
-    tag.putByte("rot", (byte) rotation);
+  public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+    var tag = super.getUpdateTag(registries);
+    tag.putByte("rot", (byte) this.rotation);
     return tag;
   }
 
   @Override
-  public void handleUpdateTag(CompoundTag tag) {
-    super.handleUpdateTag(tag);
-    rotation = tag.getByte("rot") & 3;
+  public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider lookupProvider) {
+    super.handleUpdateTag(tag, lookupProvider);
+    this.rotation = tag.getByte("rot") & 3;
   }
 
   @Override

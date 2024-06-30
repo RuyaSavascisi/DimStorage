@@ -1,13 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_diamond": {
+    "has_dimensional_chest": {
       "conditions": {
         "items": [
           {
-            "items": [
-              "minecraft:diamond"
-            ]
+            "items": "dimstorage:dimensional_chest"
           }
         ]
       },
@@ -15,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "dimstorage:dim_core"
+        "recipe": "dimstorage:dimensional_tablet"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -23,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_diamond"
+      "has_dimensional_chest"
     ]
   ],
   "rewards": {
     "recipes": [
-      "dimstorage:dim_core"
+      "dimstorage:dimensional_tablet"
     ]
   }
 }

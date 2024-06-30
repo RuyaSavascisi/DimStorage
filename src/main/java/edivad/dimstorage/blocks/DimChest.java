@@ -6,7 +6,7 @@ import edivad.dimstorage.setup.Registration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -46,16 +46,16 @@ public class DimChest extends DimBlockBase {
   }
 
   @Override
-  public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
-      InteractionHand hand, BlockHitResult hit) {
+  protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
+      BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
     if (player instanceof ServerPlayer serverPlayer) {
       if (level.getBlockEntity(pos) instanceof BlockEntityDimChest chest) {
         if (!player.isCrouching()) {
-          return chest.use(serverPlayer, level, pos, hand);
+          return chest.useItemOn(serverPlayer, level, pos, hand);
         }
       }
     }
-    return InteractionResult.sidedSuccess(level.isClientSide());
+    return ItemInteractionResult.sidedSuccess(level.isClientSide());
   }
 
   @Override

@@ -44,7 +44,7 @@ public class ScreenDimTank extends FrequencyScreen<DimTankMenu> {
 
     if (!liquidStack.isEmpty()) {
       var fluidType = liquidStack.getFluid().getFluidType();
-      String liquidName = liquidStack.getDisplayName().getString();
+      String liquidName = liquidStack.getHoverName().getString();
       guiGraphics.drawString(this.font,
           Component.translatable(Translations.LIQUID,
               liquidName.substring(0, Math.min(14, liquidName.length()))),

@@ -1,150 +1,105 @@
 package edivad.dimstorage.api;
 
-import java.util.UUID;
-import org.jetbrains.annotations.NotNull;
+import java.util.Optional;
+import java.util.function.Consumer;
 import org.jetbrains.annotations.Nullable;
+import com.mojang.authlib.GameProfile;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import edivad.dimstorage.tools.Translations;
+import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.common.util.INBTSerializable;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipProvider;
 
-public class Frequency implements INBTSerializable<CompoundTag> {
+public record Frequency(Optional<GameProfile> gameProfile, int channel) implements TooltipProvider {
 
-  private UUID owner;
-  private String ownerText;
-  private int channel;
+  public static final Codec<Frequency> CODEC =
+      RecordCodecBuilder.create(instance -> instance.group(
+          ExtraCodecs.GAME_PROFILE.optionalFieldOf("gameProfile").forGetter(Frequency::gameProfile),
+          Codec.INT.fieldOf("channel").forGetter(Frequency::channel)
+      ).apply(instance, Frequency::new)
+  );
+
+  public static final StreamCodec<RegistryFriendlyByteBuf, Frequency> STREAM_CODEC =
+      StreamCodec.composite(
+          ByteBufCodecs.optional(ByteBufCodecs.GAME_PROFILE), frequency -> frequency.gameProfile,
+          ByteBufCodecs.INT, frequency -> frequency.channel,
+          Frequency::new);
 
   public Frequency() {
     this(1);
   }
 
   public Frequency(int channel) {
-    this(null, channel);
+    this((Player) null, channel);
   }
 
   public Frequency(@Nullable Player player, int channel) {
-    if (player == null) {
-      owner = null;
-      ownerText = "public";
-    } else {
-      owner = player.getUUID();
-      ownerText = player.getName().getString();
-    }
-    this.channel = channel;
-  }
-
-  private Frequency(String ownerText, @Nullable UUID owner, int channel) {
-    this.ownerText = ownerText;
-    this.owner = owner;
-    this.channel = channel;
-  }
-
-  public Frequency(CompoundTag tagCompound) {
-    deserializeNBT(tagCompound);
-  }
-
-  public static Frequency readFromPacket(FriendlyByteBuf buf) {
-    return new Frequency(buf.readUtf(), buf.readBoolean() ? buf.readUUID() : null,
-        buf.readVarInt());
-  }
-
-  public Frequency set(Frequency frequency) {
-    this.ownerText = frequency.ownerText;
-    this.owner = frequency.owner;
-    this.channel = frequency.channel;
-    return this;
-  }
-
-  public Frequency copy() {
-    return new Frequency(ownerText, owner, channel);
+    this(Optional.ofNullable(player).map(Player::getGameProfile), channel);
   }
 
   public Frequency setPublic() {
-    owner = null;
-    ownerText = "public";
-    return this;
+    return new Frequency(Optional.empty(), this.channel);
   }
 
-  public UUID getOwnerUUID() {
-    return owner;
-  }
-
-  public String getOwner() {
-    return ownerText;
-  }
-
-  public Frequency setOwner(@NotNull Player player) {
-    owner = player.getUUID();
-    ownerText = player.getName().getString();
-    return this;
-  }
-
-  public int getChannel() {
-    return channel;
+  public Frequency setOwner(Player player) {
+    return new Frequency(player, this.channel);
   }
 
   public Frequency setChannel(int channel) {
-    this.channel = channel;
-    return this;
+    return new Frequency(this.gameProfile, channel);
   }
 
   public boolean hasOwner() {
-    return !ownerText.equals("public") && owner != null;
+    return this.gameProfile.isPresent();
+  }
+
+  public boolean canAccess(Player player) {
+    return this.gameProfile.map(profile -> profile.equals(player.getGameProfile())).orElse(true);
+  }
+
+  public String getOwner() {
+    return this.gameProfile().map(GameProfile::getName).orElse("public");
   }
 
   @Override
   public String toString() {
-    return "owner=" + (hasOwner() ? owner : "public") + ",channel=" + channel;
+    return "gameProfile=" + (this.hasOwner() ? this.gameProfile : "public") + ",channel=" + this.channel;
   }
 
-  @Override
-  public boolean equals(Object obj) {
-    if (!(obj instanceof Frequency f)) {
-      return false;
-    }
-
-    if (f.hasOwner()) {
-      return (f.channel == this.channel && f.owner.equals(owner) && f.ownerText.equals(ownerText));
-    } else {
-      return (f.channel == this.channel && f.ownerText.equals(ownerText));
-    }
-  }
-
-  public void writeToPacket(FriendlyByteBuf buf) {
-    buf.writeUtf(ownerText);
-    buf.writeBoolean(hasOwner());
-    if (hasOwner()) {
-      buf.writeUUID(owner);
-    }
-    buf.writeVarInt(channel);
-  }
-
-  public boolean canAccess(@NotNull Player player) {
-    if (!hasOwner()) {
-      return true;
-    }
-    return getOwnerUUID().equals(player.getUUID());
-  }
-
-  @Override
   public CompoundTag serializeNBT() {
-    CompoundTag tagCompound = new CompoundTag();
-    tagCompound.putString("ownerText", ownerText);
-    if (hasOwner()) {
-      tagCompound.putUUID("owner", owner);
+    var tag = new CompoundTag();
+    this.gameProfile.ifPresent(profile -> {
+      tag.putUUID("gameProfile", profile.getId());
+      tag.putString("ownerName", profile.getName());
+    });
+    tag.putInt("channel", this.channel);
+    return tag;
+  }
+
+  public static Frequency deserializeNBT(CompoundTag tag) {
+    if (tag.contains("gameProfile") && tag.contains("ownerName")) {
+      var owner = new GameProfile(tag.getUUID("gameProfile"), tag.getString("ownerName"));
+      return new Frequency(Optional.of(owner), tag.getInt("channel"));
     }
-    tagCompound.putInt("channel", channel);
-    return tagCompound;
+    return new Frequency(Optional.empty(), tag.getInt("channel"));
   }
 
   @Override
-  public void deserializeNBT(CompoundTag tagCompound) {
-    ownerText = tagCompound.getString("ownerText");
-    if (!ownerText.equals("public")) {
-      owner = tagCompound.getUUID("owner");
-    } else {
-      owner = null;
+  public void addToTooltip(Item.TooltipContext context, Consumer<Component> consumer, TooltipFlag flag) {
+    if (this.hasOwner()) {
+      consumer.accept(Component.translatable(Translations.OWNER).append(" " + this.getOwner())
+          .withStyle(ChatFormatting.DARK_RED));
     }
-    channel = tagCompound.getInt("channel");
+    consumer.accept(Component.translatable(Translations.FREQUENCY)
+        .append(" " + this.channel()));
   }
 }

@@ -10,6 +10,7 @@ import edivad.dimstorage.DimStorage;
 import edivad.dimstorage.api.AbstractDimStorage;
 import edivad.dimstorage.api.DimStoragePlugin;
 import edivad.dimstorage.api.Frequency;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
@@ -64,7 +65,7 @@ public class DimStorageManager extends SavedData {
 
   private static DimStorageManager get(ServerLevel level) {
     return level.getDataStorage()
-        .computeIfAbsent(new SavedData.Factory<>(() -> new DimStorageManager(level), tag -> {
+        .computeIfAbsent(new SavedData.Factory<>(() -> new DimStorageManager(level), (tag, registries) -> {
           var manager = new DimStorageManager(level);
           manager.load(tag);
           return manager;
@@ -93,9 +94,9 @@ public class DimStorageManager extends SavedData {
   }
 
   @Override
-  public CompoundTag save(CompoundTag tag) {
+  public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
     for (var inv : dirtyStorage) {
-      saveTag.put(buildKey(inv.freq, inv.type()), inv.saveToTag());
+      saveTag.put(buildKey(inv.freq, inv.type()), inv.saveToTag(registries));
       inv.setClean();
     }
     dirtyStorage.clear();
@@ -111,7 +112,8 @@ public class DimStorageManager extends SavedData {
     return frequency + ",type=" + type;
   }
 
-  public AbstractDimStorage getStorage(Frequency freq, String type) {
+  public AbstractDimStorage getStorage(HolderLookup.Provider registries,
+      Frequency freq, String type) {
     String key = buildKey(freq, type);
     AbstractDimStorage storage = storageMap.get(key);
 
@@ -119,7 +121,7 @@ public class DimStorageManager extends SavedData {
       storage = PLUGINS.get(type).createDimStorage(this, freq);
 
       if (!client && saveTag.contains(key)) {
-        storage.loadFromTag(saveTag.getCompound(key));
+        storage.loadFromTag(registries, saveTag.getCompound(key));
       }
 
       storageMap.put(key, storage);

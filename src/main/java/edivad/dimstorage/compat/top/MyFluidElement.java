@@ -4,7 +4,7 @@ import edivad.dimstorage.DimStorage;
 import edivad.dimstorage.blockentities.BlockEntityDimTank;
 import edivad.edivadlib.compat.top.FluidElement;
 import edivad.edivadlib.tools.utils.FluidUtils;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.fluids.FluidStack;
 
@@ -21,8 +21,8 @@ public class MyFluidElement extends FluidElement {
         FluidUtils.getLiquidColorWithBiome(blockentity.liquidState.serverLiquid, blockentity));
   }
 
-  public MyFluidElement(FriendlyByteBuf buf) {
-    super(buf.readFluidStack(), buf.readInt(), buf.readInt());
+  public MyFluidElement(RegistryFriendlyByteBuf buf) {
+    super(FluidStack.OPTIONAL_STREAM_CODEC.decode(buf), buf.readInt(), buf.readInt());
   }
 
   @Override

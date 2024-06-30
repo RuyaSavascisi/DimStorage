@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 
 public class DimChestRenderer implements BlockEntityRenderer<BlockEntityDimChest> {
 
@@ -147,23 +148,24 @@ public class DimChestRenderer implements BlockEntityRenderer<BlockEntityDimChest
     poseStack.translate(0D, -2D, 0D);
 
     VertexConsumer buffer = bufferIn.getBuffer(RenderType.entitySolid(TEXTURE));
-    staticLayer.render(poseStack, buffer, combinedLightIn, combinedOverlayIn, 1F, 1F, 1F, 1F);
+    var color = FastColor.ARGB32.colorFromFloat(1F, 1F, 1F, 1F);
+    staticLayer.render(poseStack, buffer, combinedLightIn, combinedOverlayIn, color);
     // Render movable part
     poseStack.pushPose();
     poseStack.translate(0, 0, blockentity.movablePartState);
-    movableLayer.render(poseStack, buffer, combinedLightIn, combinedOverlayIn, 1F, 1F, 1F, 1F);
+    movableLayer.render(poseStack, buffer, combinedLightIn, combinedOverlayIn, color);
     poseStack.popPose();
 
     // Check state
     if (blockentity.locked) {
       redIndicatorLayer
-          .render(poseStack, buffer, combinedLightIn, combinedOverlayIn, 1F, 1F, 1F, 1F);
+          .render(poseStack, buffer, combinedLightIn, combinedOverlayIn, color);
     } else if (blockentity.getFrequency().hasOwner()) {
       blueIndicatorLayer
-          .render(poseStack, buffer, combinedLightIn, combinedOverlayIn, 1F, 1F, 1F, 1F);
+          .render(poseStack, buffer, combinedLightIn, combinedOverlayIn, color);
     } else {
       greenIndicatorLayer
-          .render(poseStack, buffer, combinedLightIn, combinedOverlayIn, 1F, 1F, 1F, 1F);
+          .render(poseStack, buffer, combinedLightIn, combinedOverlayIn, color);
     }
 
     poseStack.popPose();

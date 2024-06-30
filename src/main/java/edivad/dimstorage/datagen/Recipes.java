@@ -1,6 +1,8 @@
 package edivad.dimstorage.datagen;
 
+import java.util.concurrent.CompletableFuture;
 import edivad.dimstorage.setup.Registration;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
@@ -11,8 +13,8 @@ import net.neoforged.neoforge.common.Tags;
 
 public class Recipes extends RecipeProvider {
 
-  public Recipes(PackOutput packOutput) {
-    super(packOutput);
+  public Recipes(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> registries) {
+    super(packOutput, registries);
   }
 
   @Override
@@ -75,7 +77,7 @@ public class Recipes extends RecipeProvider {
         .define('a', Registration.DIMWALL.get())
         .define('b', Registration.SOLIDDIMCORE.get())
         .define('c', Items.CAULDRON)
-        .define('d', Tags.Items.GLASS)
+        .define('d', Tags.Items.GLASS_BLOCKS)
         .unlockedBy(getHasName(Items.CAULDRON), has(Items.CAULDRON))
         .save(recipeOutput);
   }

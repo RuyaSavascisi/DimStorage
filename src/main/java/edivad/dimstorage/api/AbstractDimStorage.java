@@ -1,6 +1,7 @@
 package edivad.dimstorage.api;
 
 import edivad.dimstorage.manager.DimStorageManager;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
 public abstract class AbstractDimStorage {
@@ -12,7 +13,7 @@ public abstract class AbstractDimStorage {
 
   public AbstractDimStorage(DimStorageManager manager, Frequency freq) {
     this.manager = manager;
-    this.freq = freq.copy();
+    this.freq = freq;
 
     this.dirty = false;
     this.changeCount = 0;
@@ -41,9 +42,9 @@ public abstract class AbstractDimStorage {
 
   public abstract String type();
 
-  public abstract CompoundTag saveToTag();
+  public abstract CompoundTag saveToTag(HolderLookup.Provider registries);
 
-  public abstract void loadFromTag(CompoundTag tag);
+  public abstract void loadFromTag(HolderLookup.Provider registries, CompoundTag tag);
 
   @Override
   public String toString() {

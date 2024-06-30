@@ -19,7 +19,7 @@ public class DimBlockBaseComponent implements IBlockComponentProvider {
       var tag = accessor.getServerData();
       var has_owner = tag.getBoolean("has_owner");
       var can_access = tag.getBoolean("can_access");
-      var owner = tag.getString("owner");
+      var owner = tag.getString("gameProfile");
       var frequency = tag.getInt("frequency");
       var locked = tag.getBoolean("locked");
 

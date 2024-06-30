@@ -1,5 +1,5 @@
-// 1.20.4	2024-01-03T09:24:44.706942	Advancements
-4e6f9cb8581eff75e87aaa959b013edec547db7a data/dimstorage/advancements/dimensional_chest.json
-15e7c66e1de385513630ffe062c5949195b7f209 data/dimstorage/advancements/dimensional_tablet.json
-df6f85db39ef1b64508513da70a5538b376881de data/dimstorage/advancements/dimensional_tank.json
-955ff308bb7aa1d639ce0851ced6f977792677d5 data/dimstorage/advancements/root.json
+// 1.21	2024-06-30T22:26:21.548325	Advancements
+a0cab319b9aecc18ffb4787f101018cdf98fc1c8 data/dimstorage/advancement/dimensional_chest.json
+50df09519938ff97089260b48a8fc6741ba713df data/dimstorage/advancement/dimensional_tablet.json
+e3f6acb737ecc33f046dc49a06da5b33945a8c3f data/dimstorage/advancement/dimensional_tank.json
+bd7958a100a544b6edeeb8ad79b04f0b657cc071 data/dimstorage/advancement/root.json

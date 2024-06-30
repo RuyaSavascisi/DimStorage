@@ -1,13 +1,10 @@
 {
-  "parent": "dimstorage:root",
   "criteria": {
     "inv_changed": {
       "conditions": {
         "items": [
           {
-            "items": [
-              "dimstorage:dimensional_chest"
-            ]
+            "items": "dimstorage:dim_core"
           }
         ]
       },
@@ -15,14 +12,16 @@
     }
   },
   "display": {
+    "background": "minecraft:textures/gui/advancements/backgrounds/stone.png",
     "description": {
-      "translate": "advancements.dimstorage.dimensional_chest.desc"
+      "translate": "advancements.dimstorage.root.desc"
     },
     "icon": {
-      "item": "dimstorage:dimensional_chest"
+      "count": 1,
+      "id": "dimstorage:dim_core"
     },
     "title": {
-      "translate": "advancements.dimstorage.dimensional_chest"
+      "translate": "advancements.dimstorage.root"
     }
   },
   "requirements": [

@@ -1,13 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_dimensional_chest": {
+    "has_solid_dim_core": {
       "conditions": {
         "items": [
           {
-            "items": [
-              "dimstorage:dimensional_chest"
-            ]
+            "items": "dimstorage:solid_dim_core"
           }
         ]
       },
@@ -15,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "dimstorage:dimensional_tablet"
+        "recipe": "dimstorage:dimensional_chest"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -23,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_dimensional_chest"
+      "has_solid_dim_core"
     ]
   ],
   "rewards": {
     "recipes": [
-      "dimstorage:dimensional_tablet"
+      "dimstorage:dimensional_chest"
     ]
   }
 }

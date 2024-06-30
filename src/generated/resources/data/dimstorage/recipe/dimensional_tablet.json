@@ -3,24 +3,25 @@
   "category": "misc",
   "key": {
     "a": {
-      "item": "dimstorage:dim_wall"
+      "item": "minecraft:obsidian"
     },
     "b": {
       "item": "dimstorage:solid_dim_core"
     },
     "c": {
-      "item": "minecraft:cauldron"
+      "item": "minecraft:iron_ingot"
     },
     "d": {
-      "tag": "forge:glass"
+      "tag": "c:glass_panes"
     }
   },
   "pattern": [
-    "ada",
-    "dcd",
+    "cdc",
+    "cdc",
     "aba"
   ],
   "result": {
-    "item": "dimstorage:dimensional_tank"
+    "count": 1,
+    "id": "dimstorage:dimensional_tablet"
   }
 }

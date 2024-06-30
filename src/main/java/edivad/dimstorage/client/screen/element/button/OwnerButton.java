@@ -3,7 +3,6 @@ package edivad.dimstorage.client.screen.element.button;
 import edivad.dimstorage.blockentities.BlockEntityDimChest;
 import edivad.dimstorage.blockentities.BlockEntityDimTank;
 import edivad.dimstorage.blockentities.BlockEntityFrequencyOwner;
-import edivad.dimstorage.network.PacketHandler;
 import edivad.dimstorage.network.to_server.UpdateDimChest;
 import edivad.dimstorage.network.to_server.UpdateDimTank;
 import edivad.dimstorage.setup.Config;
@@ -11,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class OwnerButton extends AbstractButton {
 
@@ -30,9 +30,9 @@ public class OwnerButton extends AbstractButton {
   public void onPress() {
     owner.swapOwner(Minecraft.getInstance().player);
     if (owner instanceof BlockEntityDimChest chest) {
-      PacketHandler.sendToServer(new UpdateDimChest(chest));
+      PacketDistributor.sendToServer(new UpdateDimChest(chest));
     } else if (owner instanceof BlockEntityDimTank tank) {
-      PacketHandler.sendToServer(new UpdateDimTank(tank));
+      PacketDistributor.sendToServer(new UpdateDimTank(tank));
     }
   }
 

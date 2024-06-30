@@ -4,36 +4,32 @@ import edivad.dimstorage.DimStorage;
 import edivad.dimstorage.api.Frequency;
 import edivad.dimstorage.manager.DimStorageManager;
 import edivad.dimstorage.storage.DimChestStorage;
-import edivad.edivadlib.network.EdivadLibPacket;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.handling.PlayPayloadContext;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public record OpenChest (Frequency freq, boolean open) implements EdivadLibPacket {
+public record OpenChest(Frequency freq, boolean open) implements CustomPacketPayload {
 
-  public static final ResourceLocation ID = DimStorage.rl("open_chest");
+  public static final Type<OpenChest> TYPE =
+      new Type<>(DimStorage.rl("open_chest"));
 
-  public static OpenChest read(FriendlyByteBuf buf) {
-    return new OpenChest(Frequency.readFromPacket(buf), buf.readBoolean());
-  }
-
-  @Override
-  public void write(FriendlyByteBuf buf) {
-    freq.writeToPacket(buf);
-    buf.writeBoolean(open);
-  }
+  public static final StreamCodec<RegistryFriendlyByteBuf, OpenChest> STREAM_CODEC =
+      StreamCodec.composite(
+          Frequency.STREAM_CODEC, OpenChest::freq,
+          ByteBufCodecs.BOOL, OpenChest::open,
+          OpenChest::new);
 
   @Override
-  public ResourceLocation id() {
-    return ID;
+  public Type<? extends CustomPacketPayload> type() {
+    return TYPE;
   }
 
-  @Override
-  public void handle(PlayPayloadContext context) {
-    context.level().ifPresent(level -> {
-      ((DimChestStorage) DimStorageManager.instance(level)
-          .getStorage(freq, "item"))
-          .setClientOpen(open ? 1 : 0);
-    });
+  public static void handle(OpenChest message, IPayloadContext ctx) {
+    var level = ctx.player().level();
+    ((DimChestStorage) DimStorageManager.instance(level)
+        .getStorage(level.registryAccess(), message.freq, "item"))
+        .setClientOpen(message.open ? 1 : 0);
   }
 }

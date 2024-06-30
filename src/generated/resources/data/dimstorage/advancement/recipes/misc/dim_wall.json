@@ -1,13 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_dim_core": {
+    "has_ender_pearl": {
       "conditions": {
         "items": [
           {
-            "items": [
-              "dimstorage:dim_core"
-            ]
+            "items": "minecraft:ender_pearl"
           }
         ]
       },
@@ -15,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "dimstorage:solid_dim_core"
+        "recipe": "dimstorage:dim_wall"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -23,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_dim_core"
+      "has_ender_pearl"
     ]
   ],
   "rewards": {
     "recipes": [
-      "dimstorage:solid_dim_core"
+      "dimstorage:dim_wall"
     ]
   }
 }
