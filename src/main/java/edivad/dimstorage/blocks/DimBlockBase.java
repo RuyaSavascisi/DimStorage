@@ -43,7 +43,7 @@ public abstract class DimBlockBase extends Block implements EntityBlock {
     BlockEntity blockentity = level.getBlockEntity(pos);
     if (blockentity instanceof BlockEntityFrequencyOwner block) {
       if (block.canAccess(player) || player.isCreative()) {
-        return willHarvest || super.onDestroyedByPlayer(state, level, pos, player, false, fluid);
+        return super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid);
       }
     }
     return false;
