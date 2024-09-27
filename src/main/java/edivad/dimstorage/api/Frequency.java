@@ -72,7 +72,7 @@ public record Frequency(Optional<GameProfile> gameProfile, int channel) implemen
 
   @Override
   public String toString() {
-    return "gameProfile=" + (this.hasOwner() ? this.gameProfile : "public") + ",channel=" + this.channel;
+    return "gameProfile=" + (this.hasOwner() ? this.gameProfile.get().getId() : "public") + ",channel=" + this.channel;
   }
 
   public CompoundTag serializeNBT() {
